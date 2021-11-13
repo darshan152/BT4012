@@ -1,0 +1,125 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+devtools::install_github("SebastiaanHoppner/robROSE/robROSE")
+install.packages("readr")
+install.packages("dplyr")
+
+# Loading Required Packages and Train data
+library(robROSE)
+library(readr)
+library(dplyr)
+data1 <- read_csv("C:/Users/Darshan/Desktop/BT4012/Proj/Data/train1.csv")
+data2 <- read_csv("C:/Users/Darshan/Desktop/BT4012/Proj/Data/train2.csv")
+data3 <- read_csv("C:/Users/Darshan/Desktop/BT4012/Proj/Data/train3.csv")
+data4 <- read_csv("C:/Users/Darshan/Desktop/BT4012/Proj/Data/train4.csv")
+data5 <- read_csv("C:/Users/Darshan/Desktop/BT4012/Proj/Data/train5.csv")
+
+```
+
+```{r}
+# Changing the data types to factor
+
+data1$Rndrng_Prvdr_Type <- as.factor(data1$Rndrng_Prvdr_Type)
+data1$Rndrng_Prvdr_Gndr <- as.factor(data1$Rndrng_Prvdr_Gndr)
+data1$Rndrng_Prvdr_State_Abrvtn <- as.factor(data1$Rndrng_Prvdr_State_Abrvtn)
+data1$HCPCS_Cd <- as.factor(data1$HCPCS_Cd)
+data1$Fraud <- as.factor(data1$Fraud)
+
+
+data2$Rndrng_Prvdr_Type <- as.factor(data2$Rndrng_Prvdr_Type)
+data2$Rndrng_Prvdr_Gndr <- as.factor(data2$Rndrng_Prvdr_Gndr)
+data2$Rndrng_Prvdr_State_Abrvtn <- as.factor(data2$Rndrng_Prvdr_State_Abrvtn)
+data2$HCPCS_Cd <- as.factor(data2$HCPCS_Cd)
+data2$Fraud <- as.factor(data2$Fraud)
+
+data3$Rndrng_Prvdr_Type <- as.factor(data3$Rndrng_Prvdr_Type)
+data3$Rndrng_Prvdr_Gndr <- as.factor(data3$Rndrng_Prvdr_Gndr)
+data3$Rndrng_Prvdr_State_Abrvtn <- as.factor(data3$Rndrng_Prvdr_State_Abrvtn)
+data3$HCPCS_Cd <- as.factor(data3$HCPCS_Cd)
+data3$Fraud <- as.factor(data3$Fraud)
+
+
+data4$Rndrng_Prvdr_Type <- as.factor(data4$Rndrng_Prvdr_Type)
+data4$Rndrng_Prvdr_Gndr <- as.factor(data4$Rndrng_Prvdr_Gndr)
+data4$Rndrng_Prvdr_State_Abrvtn <- as.factor(data4$Rndrng_Prvdr_State_Abrvtn)
+data4$HCPCS_Cd <- as.factor(data4$HCPCS_Cd)
+data4$Fraud <- as.factor(data4$Fraud)
+
+data5$Rndrng_Prvdr_Type <- as.factor(data5$Rndrng_Prvdr_Type)
+data5$Rndrng_Prvdr_Gndr <- as.factor(data5$Rndrng_Prvdr_Gndr)
+data5$Rndrng_Prvdr_State_Abrvtn <- as.factor(data5$Rndrng_Prvdr_State_Abrvtn)
+data5$HCPCS_Cd <- as.factor(data5$HCPCS_Cd)
+data5$Fraud <- as.factor(data5$Fraud)
+```
+
+```{r}
+
+# Removing total services
+
+data1 <- data1 %>%  select(Rndrng_Prvdr_Type, Rndrng_Prvdr_Gndr, Rndrng_Prvdr_State_Abrvtn,  HCPCS_Cd, Tot_Benes, Tot_Bene_Day_Srvcs, Avg_Sbmtd_Chrg, Avg_Mdcr_Pymt_Amt,Fraud)
+data2 <- data2 %>%  select(Rndrng_Prvdr_Type, Rndrng_Prvdr_Gndr, Rndrng_Prvdr_State_Abrvtn,  HCPCS_Cd, Tot_Benes, Tot_Bene_Day_Srvcs, Avg_Sbmtd_Chrg, Avg_Mdcr_Pymt_Amt,Fraud)
+data3 <- data3 %>%  select(Rndrng_Prvdr_Type, Rndrng_Prvdr_Gndr, Rndrng_Prvdr_State_Abrvtn,  HCPCS_Cd, Tot_Benes, Tot_Bene_Day_Srvcs, Avg_Sbmtd_Chrg, Avg_Mdcr_Pymt_Amt,Fraud)
+data4 <- data4 %>%  select(Rndrng_Prvdr_Type, Rndrng_Prvdr_Gndr, Rndrng_Prvdr_State_Abrvtn,  HCPCS_Cd, Tot_Benes, Tot_Bene_Day_Srvcs, Avg_Sbmtd_Chrg, Avg_Mdcr_Pymt_Amt,Fraud)
+data5 <- data5 %>%  select(Rndrng_Prvdr_Type, Rndrng_Prvdr_Gndr, Rndrng_Prvdr_State_Abrvtn,  HCPCS_Cd, Tot_Benes, Tot_Bene_Day_Srvcs, Avg_Sbmtd_Chrg, Avg_Mdcr_Pymt_Amt,Fraud)
+
+```
+
+
+```{r}
+# Performing robROSE
+
+# Store array containig class distributions
+arr <- c(0.01,0.2,0.4,0.5)
+# Array containing names to save
+name <- c('99_1','80_20','60_40','50_50')
+
+# For loop to loop through the ratios
+for(i in 1:4) {
+  # Obtaining synthesized data for first train set
+  a <- robROSE(Fraud ~  Rndrng_Prvdr_Type + Rndrng_Prvdr_Gndr +
+       Rndrng_Prvdr_State_Abrvtn + HCPCS_Cd  + Tot_Benes +
+       Tot_Bene_Day_Srvcs + Avg_Sbmtd_Chrg + Avg_Mdcr_Pymt_Amt, data1, r=arr[i], seed =    4012)['data']$data
+  # Combine syntesized data with original data
+  final <- rbind(data1,a)
+  # Write to a csv file
+  write.csv(final,paste("data/robrose_", name[i],"_1.csv", sep=""), row.names = TRUE)
+  
+  # Continuing for the next 4 train sets
+    a <- robROSE(Fraud ~  Rndrng_Prvdr_Type + Rndrng_Prvdr_Gndr +
+       Rndrng_Prvdr_State_Abrvtn + HCPCS_Cd  + Tot_Benes +
+       Tot_Bene_Day_Srvcs + Avg_Sbmtd_Chrg + Avg_Mdcr_Pymt_Amt, data2, r=arr[i], seed =    4012)['data']$data
+  final <- rbind(data2,a)
+  write.csv(final,paste("data/robrose_", name[i],"_2.csv", sep=""), row.names = TRUE)
+  
+    a <- robROSE(Fraud ~  Rndrng_Prvdr_Type + Rndrng_Prvdr_Gndr +
+       Rndrng_Prvdr_State_Abrvtn + HCPCS_Cd  + Tot_Benes +
+       Tot_Bene_Day_Srvcs + Avg_Sbmtd_Chrg + Avg_Mdcr_Pymt_Amt, data3, r=arr[i], seed =    4012)['data']$data
+  final <- rbind(data3,a)
+  write.csv(final,paste("data/robrose_", name[i],"_3.csv", sep=""), row.names = TRUE)
+  
+    a <- robROSE(Fraud ~  Rndrng_Prvdr_Type + Rndrng_Prvdr_Gndr +
+       Rndrng_Prvdr_State_Abrvtn + HCPCS_Cd  + Tot_Benes +
+       Tot_Bene_Day_Srvcs + Avg_Sbmtd_Chrg + Avg_Mdcr_Pymt_Amt, data4, r=arr[i], seed =    4012)['data']$data
+  final <- rbind(data4,a)
+  write.csv(final,paste("data/robrose_", name[i],"_4.csv", sep=""), row.names = TRUE)
+  
+    a <- robROSE(Fraud ~  Rndrng_Prvdr_Type + Rndrng_Prvdr_Gndr +
+       Rndrng_Prvdr_State_Abrvtn + HCPCS_Cd  + Tot_Benes +
+       Tot_Bene_Day_Srvcs + Avg_Sbmtd_Chrg + Avg_Mdcr_Pymt_Amt, data5, r=arr[i], seed =    4012)['data']$data
+  final <- rbind(data5,a)
+  write.csv(final,paste("data/robrose_", name[i],"_5.csv", sep=""), row.names = TRUE)
+
+}
+
+
+```
+
+
